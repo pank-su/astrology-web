@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+
+.goodScroll::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+
+}
+
+.goodScroll::-webkit-scrollbar-track {
+    width: 1px;
+    border-radius: 5px;
+    background-color: transparent;
+}
+
+
+.goodScroll::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: rgba(73, 69, 79, 0.5);
+}
+
+.licenseArea {
+    font-family: "Roboto", serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 160%;
+    padding: 25px;
+}
+
+.licenseArea:focus-visible{
+    outline: none;
+}
