@@ -27,6 +27,12 @@
     padding: 25px;
 }
 
-.licenseArea:focus-visible{
+.licenseArea:focus-visible {
     outline: none;
+}
+
+.centeredHeight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

@@ -1,7 +1,7 @@
-import { Roboto } from "@next/font/google";
+import {Roboto} from "@next/font/google";
 // @ts-ignore
-import { createTheme } from '@mui/material/styles';
-import { red } from '@mui/material/colors';
+import {createTheme} from '@mui/material/styles';
+import {red} from '@mui/material/colors';
 
 export const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -14,32 +14,55 @@ export const roboto = Roboto({
 // @ts-ignore
 
 const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#6750A4',
+        palette: {
+            primary: {
+                main: '#6750A4',
+            },
+            secondary: {
+                main: '#19857b',
+            },
+            error: {
+                main: red.A400,
+            },
         },
-        secondary: {
-            main: '#19857b',
+        typography: {
+            fontFamily: roboto.style.fontFamily,
         },
-        error: {
-            main: red.A400,
-        },
-    },
-    typography: {
-        fontFamily: roboto.style.fontFamily,
-    },
-    components:{
-        MuiButton:{
-            styleOverrides:{
-                root:{
-                    borderRadius: 45,
-                    boxShadow: 'none',
-                    textTransform: 'none',
-                    fontWeight: 400
+        components: {
+            MuiButton: {
+                styleOverrides: {
+                    root: {
+                        borderRadius: 45,
+                        boxShadow: 'none',
+                        textTransform: 'none',
+                        fontWeight: 400
+                    }
+                }
+            },
+            MuiTab: {
+                styleOverrides: {
+                    root: {
+                        textTransform: 'none',
+                        "&.Mui-selected": {
+                            backgroundColor: '#E8DEF8',
+                        }
+                    },
+                }
+            },
+            MuiTabs:{
+                styleOverrides:{
+                    root:{
+                        border: "solid 1px #6750A4",
+
+                        borderRadius: 10,
+                        backgroundColor: "#FFFBFE",
+
+                    }
                 }
             }
+
         }
-    }
-});
+    })
+;
 
 export default theme;
