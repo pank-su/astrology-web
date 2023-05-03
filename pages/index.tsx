@@ -3,7 +3,7 @@ import theme from "../public/styles/theme";
 import text from "../LICENSE.txt"
 // @ts-ignore
 import {ThemeProvider} from "@mui/material/styles";
-import {useCookies} from "react-cookie"
+// import {useCookies} from "react-cookie"
 import styles from "../public/styles/index.module.css"
 import {DataGrid, GridColDef, GridRenderCellParams} from '@mui/x-data-grid';
 import Tabs from '@mui/material/Tabs';
@@ -11,7 +11,6 @@ import Tab from '@mui/material/Tab';
 import React, {SyntheticEvent, useState} from "react";
 import Grid from '@mui/material/Grid';
 import {InfoOutlined} from "@mui/icons-material";
-import {Property} from "csstype";
 import * as XLSX from 'xlsx/xlsx.mjs';
 
 
@@ -227,13 +226,13 @@ function AstrologyView() {
 }
 
 function MainScreen() {
-    const [isAgree, setIsAgree] = useCookies(["agree"])
+    const [isAgree, setIsAgree] = useState(false)
 
     function setAgree() {
-        setIsAgree("agree", true)
+        setIsAgree( true)
     }
 
-    if (isAgree.agree == null)
+    if (!isAgree)
         return LicenseScreen(setAgree)
     else
         return AstrologyView()
