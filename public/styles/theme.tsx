@@ -59,6 +59,15 @@ const theme = createTheme({
 
                     }
                 }
+            },
+            MuiDataGrid:{
+                styleOverrides:{
+                    root:{
+                        backgroundColor: "#FFFFFF",
+                        border: "solid 1px #6750A4",
+                        borderRadius: 8
+                    }
+                }
             }
 
         }

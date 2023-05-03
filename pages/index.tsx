@@ -1,28 +1,19 @@
-import {Typography, Button, Box} from "@mui/material";
+import {Box, Button, Paper, Typography} from "@mui/material";
 import theme from "../public/styles/theme";
 import text from "../LICENSE.txt"
 // @ts-ignore
 import {ThemeProvider} from "@mui/material/styles";
 import {useCookies} from "react-cookie"
 import styles from "../public/styles/index.module.css"
-import {DataGrid, GridColDef, GridRowsProp} from '@mui/x-data-grid';
+import {DataGrid, GridColDef, GridRenderCellParams} from '@mui/x-data-grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import React, {SyntheticEvent, useState} from "react";
 import Grid from '@mui/material/Grid';
 import {InfoOutlined} from "@mui/icons-material";
+import {Property} from "csstype";
+import * as XLSX from 'xlsx/xlsx.mjs';
 
-
-const rows: GridRowsProp = [
-    { id: 1, col1: 'Hello', col2: 'World' },
-    { id: 2, col1: 'DataGridPro', col2: 'is Awesome' },
-    { id: 3, col1: 'MUI', col2: 'is Amazing' },
-];
-
-const columns: GridColDef[] = [
-    { field: 'col1', headerName: 'Column 1', width: 150 },
-    { field: 'col2', headerName: 'Column 2', width: 150 },
-];
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -31,7 +22,7 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
+    const {children, value, index, ...other} = props;
 
     return (
         <div
@@ -42,14 +33,13 @@ function TabPanel(props: TabPanelProps) {
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
+                <Box sx={{p: 3}}>
                     {children}
                 </Box>
             )}
         </div>
     );
 }
-
 
 
 function LicenseScreen(setIsAgree: () => void) {
@@ -88,12 +78,74 @@ function LicenseScreen(setIsAgree: () => void) {
     </>
 }
 
+function dateToString(date: Date): String {
+    const yyyy = date.getFullYear();
+    let mm = (date.getMonth() + 1).toString(); // Months start at 0!
+    let dd = date.getDate().toString();
+
+    if (Number(dd) < 10) dd = '0' + dd;
+    if (Number(mm) < 10) mm = '0' + mm;
+    return dd + '.' + mm + '.' + yyyy
+}
+
+function timeToString(date: Date): String{
+    let mm = date.getMinutes().toString()
+    let hh = date.getHours().toString()
+    if (Number(hh) < 10) hh = '0' + hh;
+    if (Number(mm) < 10) mm = '0' + mm;
+    return hh + '.' + mm
+}
+
 function AstrologyView() {
+    let defaultInfoText = `Расчет совместимости партнёров для:
+`
     const [value, setValue] = useState(0);
+    const [rows, setRows] = useState([])
+    if (rows.length > 0){
+        defaultInfoText += rows[0].ФИО + ", " + dateToString(rows[0]["Дата Рождения"])
+
+    }
+
+    const handleFile = event => {
+        if (event.target.files && event.target.files[0]) {
+            const f: File = event.target.files[0];
+            console.log(f)
+            f.arrayBuffer().then((value) => {
+                const workbook = XLSX.read(value, { cellDates: true })
+                const wsname = workbook.SheetNames[0];
+                const ws = workbook.Sheets[wsname];
+                let arr:any[] = XLSX.utils.sheet_to_json(ws)
+
+                for (let i = 0; i < arr.length; i++) {
+                    arr[i].id = i
+                }
+                console.log(arr)
+                setRows(arr)
+            })
+        }
+    }
 
     const handleChange = (event: SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+    // @ts-ignore
+    //[{id: 0, Дата: "test", Время: "test", Условные_единицы: "test"}]
+    if (rows.length == 0) {
+        defaultInfoText = "Пожалуйста введите файл."
+    }
+    let columns: GridColDef[] = [
+        {
+            field: 'Дата', headerName: 'Дата',
+            minWidth: 120, flex: 0.3,
+            renderCell: (params: GridRenderCellParams<Date>) => (dateToString(params.value))
+        },
+        {
+            field: 'Время', headerName: 'Время',
+            minWidth: 150, flex: 0.7,
+            renderCell: (params: GridRenderCellParams<Date>) => (timeToString(params.value))
+        },
+        {field: 'Условные единицы', headerName: 'Условные единицы', minWidth: 150, flex: 0.1},
+    ]
     return <>
         <ThemeProvider theme={theme}>
 
@@ -105,7 +157,7 @@ function AstrologyView() {
                 width: "100%"
             }}>
                 <div style={{display: "grid", width: "81%"}}>
-                    <Typography textAlign={"center"}  fontWeight={700} color={theme.palette.primary.main} variant={"h4"}>Точка
+                    <Typography textAlign={"center"} fontWeight={700} color={theme.palette.primary.main} variant={"h4"}>Точка
                         опоры. В
                         личном</Typography>
                     <Tabs style={{marginTop: 60}} variant={"fullWidth"} value={value} onChange={handleChange}>
@@ -121,24 +173,57 @@ function AstrologyView() {
                         paddingRight: 24,
                         borderRadius: 15
                     }}>
-                        <Grid xs={1} className={styles.centeredHeight}>
+                        <Grid xs={1} item className={styles.centeredHeight}>
                             <InfoOutlined color={"primary"}/>
                         </Grid>
-                        <Grid xs={7}>
-                            <Typography color={"#21005D"} variant={"body1"}>Расчет совместимости партнёров для:<br/>Гамуйло
-                                Сергей Сергеевич, 29.12.2004 </Typography>
+                        { rows.length == 0 &&
+                            <Grid xs={7} item className={styles.centeredHeight}>
+                                <Typography style={{whiteSpace: "pre-line"}} color={"#21005D"}
+                                        variant={"body1"}>{defaultInfoText}</Typography>
+                            </Grid>
+                        }
+                        { rows.length != 0 &&
+                            <Grid xs={7} item>
+                                <Typography style={{whiteSpace: "pre-line"}} color={"#21005D"}
+                                            variant={"body1"}>{defaultInfoText}</Typography>
+                            </Grid>
+                        }
+                        <Grid xs={4} item className={styles.centeredHeight}>
+                            {rows.length != 0 &&
+
+                                <Button style={{height: "70%"}} variant={"contained"}>Сбросить</Button>}
+                            {rows.length != 0 &&
+                                <Button style={{height: "70%", marginLeft: 16}}
+                                        variant={"outlined"}>Инструкция</Button>
+                            }
+                            {rows.length == 0 &&
+                                <Button
+                                    variant="contained"
+                                    component="label"
+                                >
+                                    Выбрать файл
+                                    <input
+                                        type="file"
+                                        accept={".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"}
+                                        onChange={handleFile}
+                                        hidden
+                                    />
+                                </Button>
+                            }
                         </Grid>
-                        <Grid xs={4} className={styles.centeredHeight}>
-                            <Button style={{height: "70%"}} variant={"contained"}>Сбросить</Button>
-                            <Button style={{height: "70%", marginLeft: 16}} variant={"outlined"}>Инструкция</Button>
-                        </Grid>
+
                     </Grid>
                     <TabPanel value={value} index={0}>
-                        <DataGrid rows={rows} columns={columns}  />
+                        {rows.length != 0 &&
+                            <Paper style={{borderRadius: 8}} elevation={3}>
+                                <DataGrid rows={rows}  style={{height: "40vh"}} columns={columns}/>
+                            </Paper>
+                        }
                     </TabPanel>
                 </div>
             </div>
-        </ThemeProvider></>
+        </ThemeProvider>
+    </>
 }
 
 function MainScreen() {
