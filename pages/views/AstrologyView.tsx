@@ -1,6 +1,13 @@
 import React, {SyntheticEvent, useState} from "react";
-import {Box, Button, Paper, Typography} from "@mui/material";
-import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
+import {Box, Button, Paper, TextField, Typography} from "@mui/material";
+import {
+    DataGrid,
+    GridColDef, gridFilterModelSelector,
+    GridLogicOperator,
+    GridRenderCellParams,
+    GridToolbar,
+    useGridApiRef
+} from "@mui/x-data-grid";
 import theme from "../../public/styles/theme";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -8,6 +15,8 @@ import Grid from "@mui/material/Grid";
 import styles from "../../public/styles/index.module.css";
 import {InfoOutlined} from "@mui/icons-material";
 import * as XLSX from 'xlsx/xlsx.mjs';
+import {DatePicker, LocalizationProvider, TimePicker} from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -58,12 +67,22 @@ function AstrologyView() {
     let defaultInfoText = `Расчет совместимости партнёров для:
 `
     const [value, setValue] = useState(0);
+    const [selectedDate, setSelectedDate] = useState(new Date())
+    const [selectedTime, setSelectedTime] = useState(new Date())
+    const [saveRows, setSaveRows] = useState([])
     const [rows, setRows] = useState([])
+
+    const setFilter = function () {
+        setSaveRows(rows)
+    }
+    const clearFilter = function () {
+        if (saveRows.length != 0){
+
+        }
+    }
     if (rows.length > 0) {
         defaultInfoText += rows[0].ФИО + ", " + dateToString(rows[0]["Дата Рождения"])
-
     }
-
     const handleFile = event => {
         if (event.target.files && event.target.files[0]) {
             const f: File = event.target.files[0];
@@ -104,6 +123,7 @@ function AstrologyView() {
         },
         {field: 'Условные единицы', headerName: 'Условные единицы', minWidth: 150, flex: 0.1},
     ]
+    // @ts-ignore
     return <>
         <div style={{
             display: "flex",
@@ -169,14 +189,30 @@ function AstrologyView() {
                     </Grid>
 
                 </Grid>
-                <TabPanel value={value} index={0}>
-                    {rows.length != 0 &&
-                        <Paper style={{borderRadius: 8}} elevation={3}>
-                            <DataGrid rows={rows} style={{height: "40vh"}} columns={columns}/>
-                        </Paper>
-                    }
+                {rows.length != 0 && <TabPanel value={value} index={0}>
+                    <Paper style={{borderRadius: 8}} elevation={3}>
+                        <DataGrid slots={{ toolbar: GridToolbar }} rows={rows} style={{height: "40vh"}} columns={columns}/>
+                    </Paper>
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 48,
+                        marginTop: 34
+                    }}>
+                        <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
+                            <DatePicker onChange={date => setSelectedDate(dayjs(date).toDate())} label="Выбирете дату"/>
+                        </div>
 
+                        <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
+                            <TimePicker onChange={date => setSelectedTime(dayjs(date).toDate())}
+                                        timeSteps={{hours: 1, minutes: 60}} label="Выбирете время"/>
+                        </div>
+                        <Button onClick={() => setFilter()}
+                                variant={"contained"}>Рассчитать</Button>
+                    </div>
                 </TabPanel>
+                }
             </div>
         </div>
     </>

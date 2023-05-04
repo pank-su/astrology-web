@@ -68,7 +68,18 @@ const theme = createTheme({
                         borderRadius: 8
                     }
                 }
-            }
+            },
+            MuiDatePicker:{
+                styleOverrides:{
+                    backgroundColor: "#FFFFFF"
+                }
+            },
+            MuiTimePicker:{
+                styleOverrides:{
+                    backgroundColor: "#FFFFFF"
+                }
+            },
+
 
         }
     })
