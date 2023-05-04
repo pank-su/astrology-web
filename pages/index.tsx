@@ -2,7 +2,7 @@ import theme from "../public/styles/theme";
 
 // @ts-ignore
 import {ThemeProvider} from "@mui/material/styles";
-// import {useCookies} from "react-cookie"
+import {useCookies} from "react-cookie"
 import React, {lazy, Suspense, useState} from "react";
 // import LicenseScreen from "./views/LicenseScreen";
 // import AstrologyView from "./views/AstrologyView";
@@ -18,15 +18,13 @@ const AstrologyView = lazy(() => {
 })
 
 function MainScreen() {
-    const [isAgree, setIsAgree] = useState(false)
+    const [isAgree, setIsAgree] = useCookies(["isAgree"])
 
     function setAgree() {
-        setIsAgree(true)
+        setIsAgree("isAgree", true)
     }
 
-    console.log(isAgree)
-
-    if (!isAgree)
+    if (isAgree == null)
         return <>
             <ThemeProvider theme={theme}>
                 <Suspense fallback={<p>Загрузка</p>}>

@@ -4,7 +4,7 @@ import styles from "../../public/styles/index.module.css";
 import text from "../../LICENSE.txt";
 import React from "react";
 
-interface LicenseProps{
+interface LicenseProps {
     setIsAgree: () => void
 }
 

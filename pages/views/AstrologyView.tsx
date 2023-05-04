@@ -46,7 +46,7 @@ function dateToString(date: Date): String {
     return dd + '.' + mm + '.' + yyyy
 }
 
-function timeToString(date: Date): String{
+function timeToString(date: Date): String {
     let mm = date.getMinutes().toString()
     let hh = date.getHours().toString()
     if (Number(hh) < 10) hh = '0' + hh;
@@ -59,7 +59,7 @@ function AstrologyView() {
 `
     const [value, setValue] = useState(0);
     const [rows, setRows] = useState([])
-    if (rows.length > 0){
+    if (rows.length > 0) {
         defaultInfoText += rows[0].ФИО + ", " + dateToString(rows[0]["Дата Рождения"])
 
     }
@@ -69,10 +69,10 @@ function AstrologyView() {
             const f: File = event.target.files[0];
             console.log(f)
             f.arrayBuffer().then((value) => {
-                const workbook = XLSX.read(value, { cellDates: true })
+                const workbook = XLSX.read(value, {cellDates: true})
                 const wsname = workbook.SheetNames[0];
                 const ws = workbook.Sheets[wsname];
-                let arr:any[] = XLSX.utils.sheet_to_json(ws)
+                let arr: any[] = XLSX.utils.sheet_to_json(ws)
 
                 for (let i = 0; i < arr.length; i++) {
                     arr[i].id = i
@@ -132,13 +132,13 @@ function AstrologyView() {
                     <Grid xs={1} item className={styles.centeredHeight}>
                         <InfoOutlined color={"primary"}/>
                     </Grid>
-                    { rows.length == 0 &&
+                    {rows.length == 0 &&
                         <Grid xs={7} item className={styles.centeredHeight}>
                             <Typography style={{whiteSpace: "pre-line"}} color={"#21005D"}
                                         variant={"body1"}>{defaultInfoText}</Typography>
                         </Grid>
                     }
-                    { rows.length != 0 &&
+                    {rows.length != 0 &&
                         <Grid xs={7} item>
                             <Typography style={{whiteSpace: "pre-line"}} color={"#21005D"}
                                         variant={"body1"}>{defaultInfoText}</Typography>
@@ -172,9 +172,10 @@ function AstrologyView() {
                 <TabPanel value={value} index={0}>
                     {rows.length != 0 &&
                         <Paper style={{borderRadius: 8}} elevation={3}>
-                            <DataGrid rows={rows}  style={{height: "40vh"}} columns={columns}/>
+                            <DataGrid rows={rows} style={{height: "40vh"}} columns={columns}/>
                         </Paper>
                     }
+
                 </TabPanel>
             </div>
         </div>
