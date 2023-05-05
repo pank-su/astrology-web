@@ -1,13 +1,6 @@
 import React, {SyntheticEvent, useState} from "react";
-import {Box, Button, Paper, TextField, Typography} from "@mui/material";
-import {
-    DataGrid,
-    GridColDef, gridFilterModelSelector,
-    GridLogicOperator,
-    GridRenderCellParams,
-    GridToolbar,
-    useGridApiRef
-} from "@mui/x-data-grid";
+import {Box, Button, Paper, Typography} from "@mui/material";
+import {DataGrid, GridColDef, GridRenderCellParams, GridToolbar} from "@mui/x-data-grid";
 import theme from "../../public/styles/theme";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -15,7 +8,8 @@ import Grid from "@mui/material/Grid";
 import styles from "../../public/styles/index.module.css";
 import {InfoOutlined} from "@mui/icons-material";
 import * as XLSX from 'xlsx/xlsx.mjs';
-import {DatePicker, LocalizationProvider, TimePicker} from "@mui/x-date-pickers";
+import {dateToString, timeToString} from "../utils";
+import {DatePicker, TimePicker} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
 interface TabPanelProps {
@@ -45,60 +39,54 @@ function TabPanel(props: TabPanelProps) {
 }
 
 
-function dateToString(date: Date): String {
-    const yyyy = date.getFullYear();
-    let mm = (date.getMonth() + 1).toString(); // Months start at 0!
-    let dd = date.getDate().toString();
 
-    if (Number(dd) < 10) dd = '0' + dd;
-    if (Number(mm) < 10) mm = '0' + mm;
-    return dd + '.' + mm + '.' + yyyy
-}
-
-function timeToString(date: Date): String {
-    let mm = date.getMinutes().toString()
-    let hh = date.getHours().toString()
-    if (Number(hh) < 10) hh = '0' + hh;
-    if (Number(mm) < 10) mm = '0' + mm;
-    return hh + '.' + mm
-}
 
 function AstrologyView() {
+
+
     let defaultInfoText = `Расчет совместимости партнёров для:
 `
     const [value, setValue] = useState(0);
+
+    const [rows, setRows] = useState([])
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedTime, setSelectedTime] = useState(new Date())
-    const [saveRows, setSaveRows] = useState([])
-    const [rows, setRows] = useState([])
+    const [filteredRows, setFilteredRows] = useState([])
+    const clearFilter = function () {
+        setFilteredRows(rows)
+    }
+
+
 
     const setFilter = function () {
-        setSaveRows(rows)
-    }
-    const clearFilter = function () {
-        if (saveRows.length != 0){
+        let goodRows = []
+        for (let i = 0; i < 2; i++) {
+            let row = rows[i];
+            if (dateToString(row["Дата"]) == dateToString(selectedDate) && timeToString(row["Время"]) == timeToString(selectedTime)) {
 
+                goodRows.push(row)
+            }
         }
+        setFilteredRows(goodRows)
     }
+
+
     if (rows.length > 0) {
-        defaultInfoText += rows[0].ФИО + ", " + dateToString(rows[0]["Дата Рождения"])
+        defaultInfoText += rows[0]["ФИО"] + ", " + dateToString(rows[0]["Дата Рождения"])
     }
-    const handleFile = event => {
+    const handleFile = async event => {
         if (event.target.files && event.target.files[0]) {
             const f: File = event.target.files[0];
-            console.log(f)
-            f.arrayBuffer().then((value) => {
-                const workbook = XLSX.read(value, {cellDates: true})
-                const wsname = workbook.SheetNames[0];
-                const ws = workbook.Sheets[wsname];
-                let arr: any[] = XLSX.utils.sheet_to_json(ws)
-
-                for (let i = 0; i < arr.length; i++) {
-                    arr[i].id = i
-                }
-                console.log(arr)
-                setRows(arr)
-            })
+            let buffer = await f.arrayBuffer()
+            const workbook = await XLSX.read(buffer, {cellDates: true})
+            const wsname = workbook.SheetNames[0];
+            const ws = workbook.Sheets[wsname];
+            let arr: any[] = await XLSX.utils.sheet_to_json(ws)
+            for (let i = 0; i < arr.length; i++) {
+                arr[i].id = i
+            }
+            setRows(arr)
+            setFilteredRows(arr)
         }
     }
 
@@ -167,7 +155,7 @@ function AstrologyView() {
                     <Grid xs={4} item className={styles.centeredHeight}>
                         {rows.length != 0 &&
 
-                            <Button style={{height: "70%"}} variant={"contained"}>Сбросить</Button>}
+                            <Button style={{height: "70%"}}  onClick={() => clearFilter()} variant={"contained"}>Сбросить</Button>}
                         {rows.length != 0 &&
                             <Button style={{height: "70%", marginLeft: 16}}
                                     variant={"outlined"}>Инструкция</Button>
@@ -189,30 +177,41 @@ function AstrologyView() {
                     </Grid>
 
                 </Grid>
-                {rows.length != 0 && <TabPanel value={value} index={0}>
-                    <Paper style={{borderRadius: 8}} elevation={3}>
-                        <DataGrid slots={{ toolbar: GridToolbar }} rows={rows} style={{height: "40vh"}} columns={columns}/>
-                    </Paper>
-                    <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 48,
-                        marginTop: 34
-                    }}>
-                        <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
-                            <DatePicker onChange={date => setSelectedDate(dayjs(date).toDate())} label="Выбирете дату"/>
-                        </div>
 
-                        <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
-                            <TimePicker onChange={date => setSelectedTime(dayjs(date).toDate())}
-                                        timeSteps={{hours: 1, minutes: 60}} label="Выбирете время"/>
+                <TabPanel value={value} index={0}>
+                    {rows.length != 0 &&
+                        <div>
+                            <Paper style={{borderRadius: 8}} elevation={3}>
+                                <DataGrid slots={{toolbar: GridToolbar}} rows={filteredRows} style={{height: "40vh"}} columns={columns}/>
+                            </Paper>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 48,
+                                marginTop: 34
+                            }}>
+                                <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
+                                    <DatePicker onChange={date => {
+                                        // @ts-ignore
+                                        setSelectedDate(dayjs(date).toDate())
+                                    }} label="Выбирете дату"/>
+                                </div>
+
+                                <div style={{backgroundColor: "#FFFFFF", borderRadius: 4}}>
+                                    <TimePicker onChange={date => {
+                                        // @ts-ignore
+                                        setSelectedTime(dayjs(date).toDate())
+                                    }}
+                                                timeSteps={{hours: 1, minutes: 60}} label="Выбирете время"/>
+                                </div>
+                                <Button onClick={() => setFilter()}
+                                        variant={"contained"}>Рассчитать</Button>
+                            </div>
                         </div>
-                        <Button onClick={() => setFilter()}
-                                variant={"contained"}>Рассчитать</Button>
-                    </div>
+                    }
                 </TabPanel>
-                }
+
             </div>
         </div>
     </>
