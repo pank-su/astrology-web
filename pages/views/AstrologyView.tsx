@@ -8,9 +8,28 @@ import Grid from "@mui/material/Grid";
 import styles from "../../public/styles/index.module.css";
 import {InfoOutlined} from "@mui/icons-material";
 import * as XLSX from 'xlsx/xlsx.mjs';
-import {dateToString, timeToString} from "../utils";
 import {DatePicker, TimePicker} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+
+
+function dateToString(date: Date): String {
+    const yyyy = date.getFullYear();
+    let mm = (date.getMonth() + 1).toString(); // Months start at 0!
+    let dd = date.getDate().toString();
+
+    if (Number(dd) < 10) dd = '0' + dd;
+    if (Number(mm) < 10) mm = '0' + mm;
+    return dd + '.' + mm + '.' + yyyy
+}
+
+function timeToString(date: Date): String {
+    let mm = date.getMinutes().toString()
+    let hh = date.getHours().toString()
+    if (Number(hh) < 10) hh = '0' + hh;
+    if (Number(mm) < 10) mm = '0' + mm;
+    return hh + '.' + mm
+}
+
 
 interface TabPanelProps {
     children?: React.ReactNode;
