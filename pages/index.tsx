@@ -24,7 +24,7 @@ function MainScreen() {
         setIsAgree(true)
     }
 
-    if (isAgree )
+    if (!isAgree )
         return <>
             <ThemeProvider theme={theme}>
                 <Suspense fallback={<p>Загрузка</p>}>
