@@ -229,29 +229,31 @@ function AstrologyView() {
                     }
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexDirection: "column"
-                    }}>
-                        <Typography variant={"h6"}>Наибольшие показатели</Typography>
-                        <Paper style={{borderRadius: 8}} elevation={3}>
-                            <DataGrid style={{height: "40vh", width: "100%"}} initialState={{
-                                sorting: {
-                                    sortModel: [{field: 'Условные единицы', sort: 'desc'}],
-                                },
-                            }} columns={columns} rows={rows}/>
-                        </Paper>
-                        <Typography variant={"h6"}>Наименьшие показатели</Typography>
-                        <Paper style={{borderRadius: 8}} elevation={3}>
-                            <DataGrid style={{height: "40vh"}} initialState={{
-                                sorting: {
-                                    sortModel: [{field: 'Условные единицы', sort: 'asc'}],
-                                },
-                            }} columns={columns} rows={rows}/>
-                        </Paper>
-                    </div>
+                    {rows.length != 0 &&
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexDirection: "column"
+                        }}>
+                            <Typography variant={"h6"}>Наибольшие показатели</Typography>
+                            <Paper style={{borderRadius: 8}} elevation={3}>
+                                <DataGrid style={{height: "40vh", width: "100%"}} initialState={{
+                                    sorting: {
+                                        sortModel: [{field: 'Условные единицы', sort: 'desc'}],
+                                    },
+                                }} columns={columns} rows={rows}/>
+                            </Paper>
+                            <Typography variant={"h6"}>Наименьшие показатели</Typography>
+                            <Paper style={{borderRadius: 8}} elevation={3}>
+                                <DataGrid style={{height: "40vh"}} initialState={{
+                                    sorting: {
+                                        sortModel: [{field: 'Условные единицы', sort: 'asc'}],
+                                    },
+                                }} columns={columns} rows={rows}/>
+                            </Paper>
+                        </div>
+                    }
                 </TabPanel>
 
             </div>
