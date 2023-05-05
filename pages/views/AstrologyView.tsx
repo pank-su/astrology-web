@@ -1,6 +1,6 @@
 import React, {SyntheticEvent, useState} from "react";
 import {Box, Button, Paper, Typography} from "@mui/material";
-import {DataGrid, GridColDef, GridRenderCellParams, GridToolbar} from "@mui/x-data-grid";
+import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
 import theme from "../../public/styles/theme";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -39,8 +39,6 @@ function TabPanel(props: TabPanelProps) {
 }
 
 
-
-
 function AstrologyView() {
 
 
@@ -55,7 +53,6 @@ function AstrologyView() {
     const clearFilter = function () {
         setFilteredRows(rows)
     }
-
 
 
     const setFilter = function () {
@@ -155,7 +152,8 @@ function AstrologyView() {
                     <Grid xs={4} item className={styles.centeredHeight}>
                         {rows.length != 0 &&
 
-                            <Button style={{height: "70%"}}  onClick={() => clearFilter()} variant={"contained"}>Сбросить</Button>}
+                            <Button style={{height: "70%"}} onClick={() => clearFilter()}
+                                    variant={"contained"}>Сбросить</Button>}
                         {rows.length != 0 &&
                             <Button style={{height: "70%", marginLeft: 16}}
                                     variant={"outlined"}>Инструкция</Button>
@@ -182,7 +180,7 @@ function AstrologyView() {
                     {rows.length != 0 &&
                         <div>
                             <Paper style={{borderRadius: 8}} elevation={3}>
-                                <DataGrid slots={{toolbar: GridToolbar}} rows={filteredRows} style={{height: "40vh"}} columns={columns}/>
+                                <DataGrid rows={filteredRows} style={{height: "40vh"}} columns={columns}/>
                             </Paper>
                             <div style={{
                                 display: "flex",
@@ -210,6 +208,31 @@ function AstrologyView() {
                             </div>
                         </div>
                     }
+                </TabPanel>
+                <TabPanel value={value} index={1}>
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "column"
+                    }}>
+                        <Typography variant={"h6"}>Наибольшие показатели</Typography>
+                        <Paper style={{borderRadius: 8}} elevation={3}>
+                            <DataGrid style={{height: "40vh", width: "100%"}} initialState={{
+                                sorting: {
+                                    sortModel: [{field: 'Условные единицы', sort: 'desc'}],
+                                },
+                            }} columns={columns} rows={rows}/>
+                        </Paper>
+                        <Typography variant={"h6"}>Наименьшие показатели</Typography>
+                        <Paper style={{borderRadius: 8}} elevation={3}>
+                            <DataGrid style={{height: "40vh"}} initialState={{
+                                sorting: {
+                                    sortModel: [{field: 'Условные единицы', sort: 'asc'}],
+                                },
+                            }} columns={columns} rows={rows}/>
+                        </Paper>
+                    </div>
                 </TabPanel>
 
             </div>
