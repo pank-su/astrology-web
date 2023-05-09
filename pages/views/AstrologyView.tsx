@@ -1,5 +1,5 @@
-import React, {SyntheticEvent, useState} from "react";
-import {Box, Button, Paper, Typography} from "@mui/material";
+import React, {lazy, SyntheticEvent, useState, Suspense} from "react";
+import {Box, Button, Paper, Typography, Backdrop, CircularProgress} from "@mui/material";
 import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
 import theme from "../../public/styles/theme";
 import Tabs from "@mui/material/Tabs";
@@ -11,6 +11,8 @@ import * as XLSX from 'xlsx/xlsx.mjs';
 import {DatePicker, TimePicker} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
+
+const MinMax = lazy(() => import("./MinMax"))
 
 function dateToString(date: Date): String {
     const yyyy = date.getFullYear();
@@ -57,6 +59,14 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
+function compasreRows(a, b) {
+    if (a["Условные единицы"] > b["Условные единицы"])
+        return 1
+    else if (a["Условные единицы"] < b["Условные единицы"])
+        return -1
+    else return 0
+}
+
 
 function AstrologyView() {
 
@@ -69,6 +79,9 @@ function AstrologyView() {
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedTime, setSelectedTime] = useState(new Date())
     const [filteredRows, setFilteredRows] = useState([])
+    const [minRows, setMinRows] = useState([])
+    const [maxRows, setMaxRows] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
     const clearFilter = function () {
         setFilteredRows(rows)
     }
@@ -79,7 +92,6 @@ function AstrologyView() {
         for (let i = 0; i < 2; i++) {
             let row = rows[i];
             if (dateToString(row["Дата"]) == dateToString(selectedDate) && timeToString(row["Время"]) == timeToString(selectedTime)) {
-
                 goodRows.push(row)
             }
         }
@@ -88,10 +100,17 @@ function AstrologyView() {
 
 
     if (rows.length > 0) {
-        defaultInfoText += rows[0]["ФИО"] + ", " + dateToString(rows[0]["Дата Рождения"])
+        try {
+            defaultInfoText += rows[0]["ФИО"] + ", " + dateToString(rows[0]["Дата Рождения"])
+        } catch (e) {
+            console.log("Фамилии")
+        }
+    } else {
+        defaultInfoText = "Пожалуйста введите файл."
     }
     const handleFile = async event => {
         if (event.target.files && event.target.files[0]) {
+            setIsLoading(true)
             const f: File = event.target.files[0];
             let buffer = await f.arrayBuffer()
             const workbook = await XLSX.read(buffer, {cellDates: true})
@@ -103,6 +122,11 @@ function AstrologyView() {
             }
             setRows(arr)
             setFilteredRows(arr)
+            let newArr = [...arr]
+            newArr.sort(compasreRows)
+            setMinRows(newArr.slice(0, 5))
+            setMaxRows(newArr.slice(newArr.length - 5, newArr.length ))
+            setIsLoading(false)
         }
     }
 
@@ -111,9 +135,7 @@ function AstrologyView() {
     };
     // @ts-ignore
     //[{id: 0, Дата: "test", Время: "test", Условные_единицы: "test"}]
-    if (rows.length == 0) {
-        defaultInfoText = "Пожалуйста введите файл."
-    }
+
     let columns: GridColDef[] = [
         {
             field: 'Дата', headerName: 'Дата',
@@ -135,7 +157,12 @@ function AstrologyView() {
             justifyContent: "center",
             height: "100vh",
             width: "100%"
-        }}>
+        }}><Backdrop
+            sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
+            open={isLoading}
+        >
+            <CircularProgress color="inherit"/>
+        </Backdrop>
             <div style={{display: "grid", width: "81%"}}>
                 <Typography textAlign={"center"} fontWeight={700} color={theme.palette.primary.main} variant={"h4"}>Точка
                     опоры. В
@@ -230,29 +257,9 @@ function AstrologyView() {
                 </TabPanel>
                 <TabPanel value={value} index={1}>
                     {rows.length != 0 &&
-                        <div style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexDirection: "column"
-                        }}>
-                            <Typography variant={"h6"}>Наибольшие показатели</Typography>
-                            <Paper style={{borderRadius: 8}} elevation={3}>
-                                <DataGrid style={{height: "40vh", width: "100%"}} initialState={{
-                                    sorting: {
-                                        sortModel: [{field: 'Условные единицы', sort: 'desc'}],
-                                    },
-                                }} columns={columns} rows={rows}/>
-                            </Paper>
-                            <Typography variant={"h6"}>Наименьшие показатели</Typography>
-                            <Paper style={{borderRadius: 8}} elevation={3}>
-                                <DataGrid style={{height: "40vh"}} initialState={{
-                                    sorting: {
-                                        sortModel: [{field: 'Условные единицы', sort: 'asc'}],
-                                    },
-                                }} columns={columns} rows={rows}/>
-                            </Paper>
-                        </div>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <MinMax columns={columns} minRows={minRows} maxRows={maxRows}/>
+                        </Suspense>
                     }
                 </TabPanel>
 
