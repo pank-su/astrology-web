@@ -7,6 +7,15 @@ module.exports = {
                 type: 'asset/source',
             }
         )
+        config.module.rules.push({
+            test: /\.worker\.ts$/,
+            loader: 'worker-loader',
+            // options: { inline: true }, // also works
+            options: {
+                name: 'static/[hash].worker.js',
+                publicPath: '/_next/',
+            },
+        });
         return config
     },
 }
