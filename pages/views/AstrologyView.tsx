@@ -1,5 +1,5 @@
-import React, {lazy, SyntheticEvent, useState, Suspense} from "react";
-import {Box, Button, Paper, Typography, Backdrop, CircularProgress} from "@mui/material";
+import React, {lazy, Suspense, SyntheticEvent, useState} from "react";
+import {Backdrop, Box, Button, CircularProgress, Paper, Typography} from "@mui/material";
 import {DataGrid, GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
 import theme from "../../public/styles/theme";
 import Tabs from "@mui/material/Tabs";
@@ -59,13 +59,7 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-function compasreRows(a, b) {
-    if (a["Условные единицы"] > b["Условные единицы"])
-        return 1
-    else if (a["Условные единицы"] < b["Условные единицы"])
-        return -1
-    else return 0
-}
+
 
 
 function AstrologyView() {
@@ -108,27 +102,23 @@ function AstrologyView() {
     } else {
         defaultInfoText = "Пожалуйста введите файл."
     }
-    const handleFile = async event => {
+    const handleFile = async (event) => {
         if (event.target.files && event.target.files[0]) {
-            setIsLoading(true)
-            const f: File = event.target.files[0];
-            let buffer = await f.arrayBuffer()
-            const workbook = await XLSX.read(buffer, {cellDates: true})
-            const wsname = workbook.SheetNames[0];
-            const ws = workbook.Sheets[wsname];
-            let arr: any[] = await XLSX.utils.sheet_to_json(ws)
-            for (let i = 0; i < arr.length; i++) {
-                arr[i].id = i
-            }
-            setRows(arr)
-            setFilteredRows(arr)
-            let newArr = [...arr]
-            newArr.sort(compasreRows)
-            setMinRows(newArr.slice(0, 5))
-            setMaxRows(newArr.slice(newArr.length - 5, newArr.length ))
-            setIsLoading(false)
+            setIsLoading(true);
+            const file = event.target.files[0];
+            const worker = new Worker(new URL('worker.ts', import.meta.url));
+            worker.onmessage = function (event) {
+                const data = event.data;
+                setRows(data.rows);
+                setFilteredRows(data.rows);
+                setMinRows(data.minRows);
+                setMaxRows(data.maxRows);
+                setIsLoading(false);
+            };
+            worker.postMessage({ file });
         }
-    }
+    };
+
 
     const handleChange = (event: SyntheticEvent, newValue: number) => {
         setValue(newValue);
