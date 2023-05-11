@@ -8,9 +8,8 @@ function compareRows(a, b) {
         return -1
     else return 0
 }
-addEventListener('message', async (event) => {
+onmessage = async function (event) {
     const f = event.data.file;
-    console.log(f)
     const buffer = await f.arrayBuffer();
     const workbook = await XLSX.read(buffer, {cellDates: true});
     const wsname = workbook.SheetNames[0];
@@ -27,4 +26,4 @@ addEventListener('message', async (event) => {
         maxRows: sortedRows.slice(arr.length - 5, arr.length),
     };
     postMessage(data);
-})
+}
